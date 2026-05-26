@@ -40,7 +40,7 @@ export function renderReadingPlans(ctx) {
   if (activeReadingPlanId) renderReadingReview(ctx);
 }
 
-function addReadingPlan(event, ctx) {
+async function addReadingPlan(event, ctx) {
   event.preventDefault();
   const title = ctx.els.readingBookTitle.value.trim();
   if (!title) return;
@@ -49,29 +49,19 @@ function addReadingPlan(event, ctx) {
     return;
   }
 
-  const file = ctx.els.readingCover.files[0];
-  const createPlan = (cover) => {
-    ctx.state.readingPlans.push({
-      id: uid(),
-      title,
-      start: ctx.els.readingStart.value,
-      end: ctx.els.readingEnd.value,
-      cover,
-      reviews: []
-    });
-    ctx.els.readingPlanForm.reset();
-    ctx.showToast("阅读计划已创建");
-    ctx.render();
-  };
+  const cover = await findBookCover(title);
+  ctx.state.readingPlans.push({
+    id: uid(),
+    title,
+    start: ctx.els.readingStart.value,
+    end: ctx.els.readingEnd.value,
+    cover: cover || createCover(title),
+    reviews: []
+  });
 
-  if (!file) {
-    createPlan(createCover(title));
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = () => createPlan(String(reader.result || createCover(title)));
-  reader.readAsDataURL(file);
+  ctx.els.readingPlanForm.reset();
+  ctx.showToast(cover ? "阅读计划已创建，已找到封面" : "阅读计划已创建，使用文字封面");
+  ctx.render();
 }
 
 function openReadingReview(ctx, planId) {
@@ -172,6 +162,19 @@ function createCover(title) {
     </svg>
   `;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+async function findBookCover(title) {
+  try {
+    const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&fields=cover_i,title&limit=1`;
+    const response = await fetch(url);
+    if (!response.ok) return "";
+    const data = await response.json();
+    const coverId = data.docs?.find((book) => book.cover_i)?.cover_i;
+    return coverId ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg` : "";
+  } catch {
+    return "";
+  }
 }
 
 function formatRecordTime(value) {

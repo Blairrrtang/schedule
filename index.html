@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#111827">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -256,10 +257,7 @@
                   <input type="date" id="readingEnd" required>
                 </label>
               </div>
-              <label>
-                书籍封面
-                <input type="file" id="readingCover" accept="image/*">
-              </label>
+              <p class="form-hint">创建时会根据书名自动搜索书籍封面；没找到时会生成文字封面。</p>
               <button class="primary" type="submit">创建阅读计划</button>
             </form>
           </div>
@@ -389,24 +387,7 @@
             </div>
           </header>
           <div class="world-map-shell" id="worldMapShell">
-            <svg class="world-map" id="worldMap" viewBox="0 0 1000 520" role="img" aria-label="世界地图">
-              <g id="worldMapViewport">
-                <rect class="map-water" width="1000" height="520"></rect>
-                <path class="map-land" d="M118 132 L184 96 L272 110 L330 156 L306 226 L230 244 L172 216 L104 196 Z"></path>
-                <path class="map-land" d="M270 250 L326 278 L360 344 L340 438 L290 486 L250 410 L232 324 Z"></path>
-                <path class="map-land" d="M474 104 L588 82 L724 120 L852 154 L906 226 L820 244 L724 218 L646 252 L548 226 L454 188 Z"></path>
-                <path class="map-land" d="M520 246 L610 232 L668 286 L646 374 L594 432 L536 384 L500 314 Z"></path>
-                <path class="map-land" d="M756 300 L848 286 L920 340 L888 414 L786 408 L736 354 Z"></path>
-                <path class="map-land" d="M420 374 L462 360 L492 390 L472 424 L428 418 Z"></path>
-                <path class="map-land" d="M278 84 L344 66 L380 94 L330 118 Z"></path>
-                <path class="map-land" d="M444 72 L510 58 L582 70 L560 96 L474 98 Z"></path>
-                <g class="map-grid">
-                  <path d="M0 130 H1000 M0 260 H1000 M0 390 H1000"></path>
-                  <path d="M250 0 V520 M500 0 V520 M750 0 V520"></path>
-                </g>
-                <g id="travelMarkers"></g>
-              </g>
-            </svg>
+            <div class="leaflet-map" id="travelLeafletMap" role="img" aria-label="世界地图"></div>
           </div>
         </section>
       </div>
@@ -522,6 +503,7 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

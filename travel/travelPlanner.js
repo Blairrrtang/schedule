@@ -46,18 +46,17 @@ const cityCoordinates = {
 };
 
 let mapZoom = 1;
+let leafletMap = null;
+let markerLayer = null;
 
 export function initTravelPlanner(ctx) {
   fillCityOptions(ctx);
+  initLeafletMap(ctx);
   ctx.els.travelTripForm.addEventListener("submit", (event) => addTrip(event, ctx));
   ctx.els.travelStopForm.addEventListener("submit", (event) => addStop(event, ctx));
   ctx.els.travelZoomIn.addEventListener("click", () => setMapZoom(ctx, mapZoom + 0.25));
   ctx.els.travelZoomOut.addEventListener("click", () => setMapZoom(ctx, mapZoom - 0.25));
   ctx.els.travelZoomReset.addEventListener("click", () => setMapZoom(ctx, 1));
-  ctx.els.worldMapShell.addEventListener("wheel", (event) => {
-    event.preventDefault();
-    setMapZoom(ctx, mapZoom + (event.deltaY < 0 ? 0.15 : -0.15));
-  }, { passive: false });
 }
 
 export function renderTravelPlanner(ctx) {
@@ -162,35 +161,25 @@ function renderStopItem(stop) {
 function renderMarkers(ctx) {
   const stops = ctx.state.travelTrips.flatMap((trip) => trip.stops.map((stop) => ({ ...stop, tripName: trip.name })));
   ctx.els.travelMapSummary.textContent = `${stops.length} 个标记`;
-  ctx.els.travelMarkers.innerHTML = stops.map((stop) => {
-    const point = project(stop.lat, stop.lng);
-    return `
-      <g class="travel-marker" transform="translate(${point.x} ${point.y})">
-        <circle r="7"></circle>
-        <text x="10" y="-9">${escapeHTML(stop.city)}</text>
-        <title>${escapeHTML(stop.tripName)}：${escapeHTML(stop.city)} · ${escapeHTML(stop.attraction)}</title>
-      </g>
-    `;
-  }).join("");
-  applyMapZoom(ctx);
+  if (!leafletMap || !markerLayer) return;
+
+  markerLayer.clearLayers();
+  stops.forEach((stop) => {
+    const marker = window.L.marker([stop.lat, stop.lng]).bindPopup(`
+      <strong>${escapeHTML(stop.city)} · ${escapeHTML(stop.attraction)}</strong><br>
+      ${escapeHTML(stop.tripName)}<br>
+      ${escapeHTML(stop.transport)} · ${formatTravelTime(stop.time)}
+    `);
+    markerLayer.addLayer(marker);
+  });
+
+  setTimeout(() => leafletMap.invalidateSize(), 80);
 }
 
 function setMapZoom(ctx, value) {
   mapZoom = Math.min(3, Math.max(1, Number(value.toFixed(2))));
-  applyMapZoom(ctx);
-}
-
-function applyMapZoom(ctx) {
-  const tx = (1000 - 1000 * mapZoom) / 2;
-  const ty = (520 - 520 * mapZoom) / 2;
-  ctx.els.worldMapViewport.setAttribute("transform", `translate(${tx} ${ty}) scale(${mapZoom})`);
-}
-
-function project(lat, lng) {
-  return {
-    x: ((lng + 180) / 360) * 1000,
-    y: ((90 - lat) / 180) * 520
-  };
+  if (!leafletMap) return;
+  leafletMap.setZoom(Math.round((mapZoom - 1) * 3 + 2));
 }
 
 function fillCityOptions(ctx) {
@@ -213,4 +202,32 @@ function formatTravelTime(value) {
 function toDateTimeInputValue(date) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 16);
+}
+
+function initLeafletMap(ctx) {
+  if (!window.L) {
+    ctx.els.travelLeafletMap.innerHTML = `<div class="map-unavailable">地图资源未加载，请联网后刷新页面</div>`;
+    return;
+  }
+
+  leafletMap = window.L.map(ctx.els.travelLeafletMap, {
+    center: [25, 15],
+    zoom: 2,
+    minZoom: 2,
+    maxZoom: 8,
+    worldCopyJump: true,
+    zoomControl: false
+  });
+
+  window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(leafletMap);
+
+  leafletMap.on("zoomend", () => {
+    mapZoom = Math.max(1, Math.min(3, (leafletMap.getZoom() - 2) / 3 + 1));
+  });
+
+  markerLayer = window.L.layerGroup().addTo(leafletMap);
+  setTimeout(() => leafletMap.invalidateSize(), 120);
 }

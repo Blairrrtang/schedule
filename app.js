@@ -114,7 +114,6 @@ function getElements() {
     readingBookTitle: document.getElementById("readingBookTitle"),
     readingStart: document.getElementById("readingStart"),
     readingEnd: document.getElementById("readingEnd"),
-    readingCover: document.getElementById("readingCover"),
     readingPlanList: document.getElementById("readingPlanList"),
     readingReviewModal: document.getElementById("readingReviewModal"),
     closeReadingReviewBtn: document.getElementById("closeReadingReviewBtn"),
@@ -147,8 +146,7 @@ function getElements() {
     travelZoomIn: document.getElementById("travelZoomIn"),
     travelZoomReset: document.getElementById("travelZoomReset"),
     worldMapShell: document.getElementById("worldMapShell"),
-    worldMapViewport: document.getElementById("worldMapViewport"),
-    travelMarkers: document.getElementById("travelMarkers"),
+    travelLeafletMap: document.getElementById("travelLeafletMap"),
     toast: document.getElementById("toast")
   };
 }
@@ -208,6 +206,10 @@ function switchModule(viewId) {
   ctx.els.moduleViews.forEach((view) => {
     view.classList.toggle("is-active", view.id === viewId);
   });
+
+  if (viewId === "travelModule") {
+    setTimeout(() => window.dispatchEvent(new Event("resize")), 80);
+  }
 }
 
 function render() {
