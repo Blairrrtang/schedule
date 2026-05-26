@@ -46,7 +46,9 @@ export function createDefaultState(today = new Date()) {
         category: "study",
         done: false
       }
-    ]
+    ],
+    uncomfortableNotes: [],
+    quickThings: []
   };
 }
 
@@ -57,7 +59,9 @@ export function loadState() {
     return {
       events: Array.isArray(saved.events) ? saved.events : [],
       todos: saved.todos && typeof saved.todos === "object" ? saved.todos : {},
-      plans: Array.isArray(saved.plans) ? saved.plans : []
+      plans: Array.isArray(saved.plans) ? saved.plans : [],
+      uncomfortableNotes: Array.isArray(saved.uncomfortableNotes) ? saved.uncomfortableNotes : [],
+      quickThings: Array.isArray(saved.quickThings) ? saved.quickThings : []
     };
   } catch {
     return createDefaultState();

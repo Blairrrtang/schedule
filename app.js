@@ -10,6 +10,8 @@ import {
 import { eventsForDate, initCalendar, renderCalendar, renderEvents } from "./calendar/calendar.js";
 import { initDailyTodo, renderDailyTodos, todosForDate } from "./todolist/dailyTodo.js";
 import { activePlans, initLongPlan, renderLongPlans } from "./todolist/longPlan.js";
+import { initUncomfortableNotes, renderUncomfortableNotes } from "./notes/uncomfortableNotes.js";
+import { initQuickThings, renderQuickThings } from "./notes/quickThings.js";
 
 const now = new Date();
 const ctx = {
@@ -37,6 +39,8 @@ function init() {
   initCalendar(ctx);
   initDailyTodo(ctx);
   initLongPlan(ctx);
+  initUncomfortableNotes(ctx);
+  initQuickThings(ctx);
   registerServiceWorker();
   render();
 }
@@ -59,6 +63,16 @@ function getElements() {
     quickEventBtn: document.getElementById("quickEventBtn"),
     quickTodoBtn: document.getElementById("quickTodoBtn"),
     quickPlanBtn: document.getElementById("quickPlanBtn"),
+    quickUncomfortableBtn: document.getElementById("quickUncomfortableBtn"),
+    quickThingBtn: document.getElementById("quickThingBtn"),
+    openUncomfortableBtn: document.getElementById("openUncomfortableBtn"),
+    openQuickThingBtn: document.getElementById("openQuickThingBtn"),
+    closeUncomfortableBtn: document.getElementById("closeUncomfortableBtn"),
+    closeQuickThingBtn: document.getElementById("closeQuickThingBtn"),
+    uncomfortableModal: document.getElementById("uncomfortableModal"),
+    quickThingModal: document.getElementById("quickThingModal"),
+    uncomfortableCount: document.getElementById("uncomfortableCount"),
+    quickThingCount: document.getElementById("quickThingCount"),
     detailDate: document.getElementById("detailDate"),
     detailSummary: document.getElementById("detailSummary"),
     eventForm: document.getElementById("eventForm"),
@@ -80,6 +94,12 @@ function getElements() {
     planDue: document.getElementById("planDue"),
     planCategory: document.getElementById("planCategory"),
     planList: document.getElementById("planList"),
+    uncomfortableForm: document.getElementById("uncomfortableForm"),
+    uncomfortableText: document.getElementById("uncomfortableText"),
+    uncomfortableList: document.getElementById("uncomfortableList"),
+    quickThingForm: document.getElementById("quickThingForm"),
+    quickThingText: document.getElementById("quickThingText"),
+    quickThingList: document.getElementById("quickThingList"),
     toast: document.getElementById("toast")
   };
 }
@@ -95,6 +115,37 @@ function bindGlobalShortcuts() {
 
   ctx.els.quickPlanBtn.addEventListener("click", () => {
     focusSection("longPlanSection", ctx.els.planTitle);
+  });
+
+  ctx.els.quickUncomfortableBtn.addEventListener("click", () => {
+    openNoteModal(ctx.els.uncomfortableModal, ctx.els.uncomfortableText);
+  });
+
+  ctx.els.quickThingBtn.addEventListener("click", () => {
+    openNoteModal(ctx.els.quickThingModal, ctx.els.quickThingText);
+  });
+
+  ctx.els.openUncomfortableBtn.addEventListener("click", () => {
+    openNoteModal(ctx.els.uncomfortableModal, ctx.els.uncomfortableText);
+  });
+
+  ctx.els.openQuickThingBtn.addEventListener("click", () => {
+    openNoteModal(ctx.els.quickThingModal, ctx.els.quickThingText);
+  });
+
+  ctx.els.closeUncomfortableBtn.addEventListener("click", () => closeNoteModal(ctx.els.uncomfortableModal));
+  ctx.els.closeQuickThingBtn.addEventListener("click", () => closeNoteModal(ctx.els.quickThingModal));
+
+  [ctx.els.uncomfortableModal, ctx.els.quickThingModal].forEach((modal) => {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeNoteModal(modal);
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    closeNoteModal(ctx.els.uncomfortableModal);
+    closeNoteModal(ctx.els.quickThingModal);
   });
 }
 
@@ -112,10 +163,14 @@ function renderDetails() {
   const doneCount = todos.filter((todo) => todo.done).length;
 
   ctx.els.detailDate.textContent = formatLongDate(ctx.selectedDate);
-  ctx.els.detailSummary.textContent = `${events.length} 个日程 · ${todos.length} 个每日待办 · ${doneCount} 个已完成`;
+  ctx.els.detailSummary.textContent = `${events.length} 个日程 · ${todos.length} 个每日待办 · ${doneCount} 个已完成 · ${ctx.state.uncomfortableNotes.length + ctx.state.quickThings.length} 条便签`;
+  ctx.els.uncomfortableCount.textContent = ctx.state.uncomfortableNotes.length;
+  ctx.els.quickThingCount.textContent = ctx.state.quickThings.length;
   renderEvents(ctx);
   renderDailyTodos(ctx);
   renderLongPlans(ctx);
+  renderUncomfortableNotes(ctx);
+  renderQuickThings(ctx);
 }
 
 function renderSidebar() {
@@ -150,6 +205,21 @@ function showToast(message) {
   ctx.els.toast.textContent = message;
   ctx.els.toast.classList.add("show");
   ctx.toastTimer = setTimeout(() => ctx.els.toast.classList.remove("show"), 2200);
+}
+
+function openNoteModal(modal, focusTarget) {
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  setTimeout(() => focusTarget.focus(), 80);
+}
+
+function closeNoteModal(modal) {
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+  if (!document.querySelector(".note-modal.is-open")) {
+    document.body.classList.remove("modal-open");
+  }
 }
 
 function registerServiceWorker() {

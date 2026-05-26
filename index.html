@@ -24,6 +24,8 @@
         <button class="primary" id="quickEventBtn" title="新建日程">＋ 新建日程</button>
         <button id="quickTodoBtn" title="新建每日待办">＋ 每日待办</button>
         <button id="quickPlanBtn" title="新建长期计划">＋ 长期计划</button>
+        <button id="quickUncomfortableBtn" title="记录让我不舒服的小事">＋ 小事便签</button>
+        <button id="quickThingBtn" title="记录一下想到要干的事情">＋ 想到的事</button>
       </div>
 
       <section class="section">
@@ -90,95 +92,189 @@
       <div class="details-body">
         <section class="section" id="eventSection">
           <div class="section-title">
-            <h2>新建日程安排</h2>
+            <h2>日程安排</h2>
           </div>
-          <form class="form" id="eventForm">
-            <label>
-              标题
-              <input id="eventTitle" required maxlength="80" placeholder="课程、训练、会议">
-            </label>
-            <div class="form-row">
+          <div class="module-create">
+            <h3 class="subsection-title">新建日程</h3>
+            <form class="form" id="eventForm">
               <label>
-                日期
-                <input type="date" id="eventDate" required>
+                标题
+                <input id="eventTitle" required maxlength="80" placeholder="课程、训练、会议">
               </label>
+              <div class="form-row">
+                <label>
+                  日期
+                  <input type="date" id="eventDate" required>
+                </label>
+                <label>
+                  标签
+                  <select id="eventCategory"></select>
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  开始
+                  <input type="time" id="eventStart">
+                </label>
+                <label>
+                  结束
+                  <input type="time" id="eventEnd">
+                </label>
+              </div>
               <label>
-                标签
-                <select id="eventCategory"></select>
+                备注
+                <textarea id="eventNote" maxlength="240" placeholder="地点、准备事项、链接"></textarea>
               </label>
-            </div>
-            <div class="form-row">
-              <label>
-                开始
-                <input type="time" id="eventStart">
-              </label>
-              <label>
-                结束
-                <input type="time" id="eventEnd">
-              </label>
-            </div>
-            <label>
-              备注
-              <textarea id="eventNote" maxlength="240" placeholder="地点、准备事项、链接"></textarea>
-            </label>
-            <button class="primary" type="submit">保存日程</button>
-          </form>
-          <div class="items" id="eventList"></div>
+              <button class="primary" type="submit">保存日程</button>
+            </form>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">已有日程</h3>
+            <div class="items" id="eventList"></div>
+          </div>
         </section>
 
         <section class="section" id="dailyTodoSection">
           <div class="section-title">
             <h2>每日任务</h2>
           </div>
-          <form class="form" id="todoForm">
-            <div class="form-actions">
-              <label>
-                内容
-                <input id="todoText" required maxlength="90" placeholder="今天要完成的任务">
-              </label>
-              <button class="primary" type="submit">添加</button>
-            </div>
-            <div class="form-row">
-              <label>
-                标签
-                <select id="todoCategory"></select>
-              </label>
-              <label>
-                迁移到
-                <input type="date" id="bulkMoveDate">
-              </label>
-            </div>
-            <button type="button" id="moveOpenTodosBtn">迁移未完成</button>
-          </form>
-          <div class="items" id="todoList"></div>
+          <div class="module-create">
+            <h3 class="subsection-title">添加今日任务</h3>
+            <form class="form" id="todoForm">
+              <div class="form-actions">
+                <label>
+                  内容
+                  <input id="todoText" required maxlength="90" placeholder="今天要完成的任务">
+                </label>
+                <button class="primary" type="submit">添加</button>
+              </div>
+              <div class="form-row">
+                <label>
+                  标签
+                  <select id="todoCategory"></select>
+                </label>
+                <label>
+                  迁移到
+                  <input type="date" id="bulkMoveDate">
+                </label>
+              </div>
+              <button type="button" id="moveOpenTodosBtn">迁移未完成</button>
+            </form>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">今日任务列表</h3>
+            <div class="items" id="todoList"></div>
+          </div>
         </section>
 
         <section class="section" id="longPlanSection">
           <div class="section-title">
             <h2>长期计划</h2>
           </div>
-          <form class="form" id="planForm">
-            <label>
-              计划
-              <input id="planTitle" required maxlength="90" placeholder="考试复习、半马训练、项目交付">
-            </label>
-            <div class="form-row">
+          <div class="module-create">
+            <h3 class="subsection-title">新建长期计划</h3>
+            <form class="form" id="planForm">
               <label>
-                截止日
-                <input type="date" id="planDue" required>
+                计划
+                <input id="planTitle" required maxlength="90" placeholder="考试复习、半马训练、项目交付">
               </label>
-              <label>
-                标签
-                <select id="planCategory"></select>
-              </label>
-            </div>
-            <button class="primary" type="submit">保存计划</button>
-          </form>
-          <div class="items" id="planList"></div>
+              <div class="form-row">
+                <label>
+                  截止日
+                  <input type="date" id="planDue" required>
+                </label>
+                <label>
+                  标签
+                  <select id="planCategory"></select>
+                </label>
+              </div>
+              <button class="primary" type="submit">保存计划</button>
+            </form>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">进行中的长期计划</h3>
+            <div class="items" id="planList"></div>
+          </div>
+        </section>
+
+        <section class="section note-section" id="uncomfortableSection">
+          <div class="section-title">
+            <h2>让我不舒服的小事</h2>
+          </div>
+          <button class="note-entry-card uncomfortable-entry" id="openUncomfortableBtn" type="button">
+            <span class="note-entry-main">进入记录</span>
+            <span class="note-entry-meta"><span id="uncomfortableCount">0</span> 条已保存</span>
+          </button>
+        </section>
+
+        <section class="section note-section" id="quickThingsSection">
+          <div class="section-title">
+            <h2>一下想到要干的事情</h2>
+          </div>
+          <button class="note-entry-card quick-entry" id="openQuickThingBtn" type="button">
+            <span class="note-entry-main">进入记录</span>
+            <span class="note-entry-meta"><span id="quickThingCount">0</span> 条已保存</span>
+          </button>
         </section>
       </div>
     </section>
   </main>
+
+  <div class="note-modal" id="uncomfortableModal" aria-hidden="true">
+    <div class="note-modal-panel" role="dialog" aria-modal="true" aria-labelledby="uncomfortableModalTitle">
+      <header class="note-modal-head">
+        <div>
+          <h2 id="uncomfortableModalTitle">让我不舒服的小事</h2>
+          <p>保存时会自动记录日期和时间</p>
+        </div>
+        <button class="mini-btn" id="closeUncomfortableBtn" title="关闭" type="button">×</button>
+      </header>
+      <div class="note-modal-body">
+        <div class="module-create">
+          <h3 class="subsection-title">新建便签</h3>
+          <form class="form" id="uncomfortableForm">
+            <label>
+              内容
+              <textarea id="uncomfortableText" required maxlength="500" placeholder="把让你不舒服的小事记下来"></textarea>
+            </label>
+            <button class="primary" type="submit">保存记录</button>
+          </form>
+        </div>
+        <div class="module-list">
+          <h3 class="subsection-title">已保存记录</h3>
+          <div class="items" id="uncomfortableList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-modal" id="quickThingModal" aria-hidden="true">
+    <div class="note-modal-panel" role="dialog" aria-modal="true" aria-labelledby="quickThingModalTitle">
+      <header class="note-modal-head">
+        <div>
+          <h2 id="quickThingModalTitle">一下想到要干的事情</h2>
+          <p>先收下来，之后再安排</p>
+        </div>
+        <button class="mini-btn" id="closeQuickThingBtn" title="关闭" type="button">×</button>
+      </header>
+      <div class="note-modal-body">
+        <div class="module-create">
+          <h3 class="subsection-title">新建便签</h3>
+          <form class="form" id="quickThingForm">
+            <label>
+              内容
+              <textarea id="quickThingText" required maxlength="500" placeholder="先记下来，之后再安排"></textarea>
+            </label>
+            <button class="primary" type="submit">保存记录</button>
+          </form>
+        </div>
+        <div class="module-list">
+          <h3 class="subsection-title">已保存记录</h3>
+          <div class="items" id="quickThingList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
   <script type="module" src="./app.js"></script>

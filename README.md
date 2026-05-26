@@ -17,6 +17,9 @@
 ├─ todolist/
 │  ├─ dailyTodo.js
 │  └─ longPlan.js
+├─ notes/
+│  ├─ uncomfortableNotes.js
+│  └─ quickThings.js
 └─ icons/
    └─ icon.svg
 ```

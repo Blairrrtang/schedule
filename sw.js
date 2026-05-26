@@ -1,4 +1,4 @@
-const CACHE_NAME = "schedule-app-v2";
+const CACHE_NAME = "schedule-app-v5";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,8 @@ const ASSETS = [
   "./calendar/calendar.js",
   "./todolist/dailyTodo.js",
   "./todolist/longPlan.js",
+  "./notes/uncomfortableNotes.js",
+  "./notes/quickThings.js",
   "./manifest.webmanifest",
   "./icons/icon.svg"
 ];

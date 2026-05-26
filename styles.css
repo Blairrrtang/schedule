@@ -29,6 +29,10 @@ body {
   letter-spacing: 0;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 button,
 input,
 select,
@@ -499,6 +503,7 @@ textarea:focus {
   padding: 14px;
   align-content: start;
   min-width: 0;
+  gap: 14px;
 }
 
 .details-body > .section .section-title {
@@ -512,11 +517,157 @@ textarea:focus {
   text-transform: none;
 }
 
-.details-body > .section .form {
+.module-create,
+.module-list {
+  display: grid;
+  gap: 10px;
+  border-radius: var(--radius);
+  min-width: 0;
+}
+
+.module-create {
   background: var(--panel-soft);
   border: 1px solid #e8e8df;
-  border-radius: var(--radius);
   padding: 12px;
+}
+
+.module-list {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--focus);
+  padding: 12px;
+}
+
+#eventSection .module-list {
+  border-left-color: var(--study);
+}
+
+#dailyTodoSection .module-list {
+  border-left-color: var(--focus);
+}
+
+#longPlanSection .module-list {
+  border-left-color: var(--work);
+}
+
+#uncomfortableModal .module-list {
+  border-left-color: var(--health);
+}
+
+#quickThingModal .module-list {
+  border-left-color: var(--life);
+}
+
+.subsection-title {
+  margin: 0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.module-create .subsection-title {
+  color: #5b6472;
+}
+
+.module-list .subsection-title {
+  color: #111827;
+}
+
+.note-entry-card {
+  min-height: 120px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 8px;
+  text-align: left;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--focus);
+}
+
+.note-entry-card:hover {
+  background: #fbfcfb;
+}
+
+.uncomfortable-entry {
+  border-left-color: var(--health);
+}
+
+.quick-entry {
+  border-left-color: var(--life);
+}
+
+.note-entry-main {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.note-entry-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.note-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(17, 24, 39, 0.42);
+}
+
+.note-modal.is-open {
+  display: grid;
+}
+
+.note-modal-panel {
+  width: min(760px, 100%);
+  max-height: min(780px, calc(100vh - 36px));
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 80px rgba(17, 24, 39, 0.22);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.note-modal-head {
+  min-height: 74px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fbfcfb;
+}
+
+.note-modal-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.note-modal-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.note-modal-body {
+  overflow: auto;
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  background: #f7f7f3;
 }
 
 .form {
@@ -552,7 +703,8 @@ textarea:focus {
 
 .event-item,
 .todo-item,
-.plan-item {
+.plan-item,
+.note-item {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 10px;
@@ -563,11 +715,41 @@ textarea:focus {
 
 .event-top,
 .todo-top,
-.plan-top {
+.plan-top,
+.note-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+}
+
+.note-item {
+  background: #fff;
+}
+
+.uncomfortable-note {
+  border-color: #f1c8c2;
+  background: #fffafa;
+}
+
+.quick-thing {
+  border-color: #fed7aa;
+  background: #fffdf8;
+}
+
+.record-time {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 32px;
+}
+
+.note-text {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .item-title {
@@ -761,6 +943,14 @@ textarea:focus {
     grid-template-columns: 1fr;
     padding: 10px;
     gap: 10px;
+  }
+
+  .note-modal {
+    padding: 10px;
+  }
+
+  .note-modal-panel {
+    max-height: calc(100vh - 20px);
   }
 
   .day {
