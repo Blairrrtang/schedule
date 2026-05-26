@@ -10,45 +10,73 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <main class="app">
-    <aside class="sidebar">
-      <div class="brand">
+  <main class="page-shell">
+    <nav class="main-nav" aria-label="主导航">
+      <div class="main-nav-brand">
         <div class="brand-mark">日</div>
         <div>
-          <h1>日程</h1>
+          <span>日程</span>
           <p id="todayText"></p>
         </div>
       </div>
-
-      <div class="toolbar-stack">
-        <button class="primary" id="quickEventBtn" title="新建日程">＋ 新建日程</button>
-        <button id="quickTodoBtn" title="新建每日待办">＋ 每日待办</button>
-        <button id="quickPlanBtn" title="新建长期计划">＋ 长期计划</button>
-        <button id="quickUncomfortableBtn" title="记录让我不舒服的小事">＋ 小事便签</button>
-        <button id="quickThingBtn" title="记录一下想到要干的事情">＋ 想到的事</button>
+      <div class="main-nav-tabs" role="tablist" aria-label="模块">
+        <button class="nav-tab is-active" type="button" data-view="calendarModule" role="tab" aria-selected="true">日历</button>
+        <button class="nav-tab" type="button" data-view="planModule" role="tab" aria-selected="false">计划</button>
+        <button class="nav-tab" type="button" data-view="travelModule" role="tab" aria-selected="false">旅行</button>
+        <button class="nav-tab" type="button" data-view="diaryModule" role="tab" aria-selected="false">日记</button>
       </div>
+    </nav>
 
-      <section class="section">
-        <div class="section-title">
-          <h2>概览</h2>
+    <section class="module-view is-active" id="calendarModule">
+      <div class="app">
+        <aside class="sidebar">
+      <section class="sidebar-group schedule-group">
+        <div class="sidebar-group-title">
+          <h2>日程功能</h2>
         </div>
-        <div class="stats">
-          <div class="stat">
-            <b id="statEvents">0</b>
-            <span>本月日程</span>
-          </div>
-          <div class="stat">
-            <b id="statTodos">0%</b>
-            <span>今日完成</span>
-          </div>
+
+        <div class="toolbar-stack">
+          <button class="primary" id="quickEventBtn" title="新建日程">＋ 新建日程</button>
+          <button id="quickTodoBtn" title="新建每日待办">＋ 每日待办</button>
+          <button id="quickPlanBtn" title="新建长期计划">＋ 长期计划</button>
         </div>
+
+        <section class="section compact-section">
+          <div class="section-title">
+            <h2>概览</h2>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <b id="statEvents">0</b>
+              <span>本月日程</span>
+            </div>
+            <div class="stat">
+              <b id="statTodos">0%</b>
+              <span>今日完成</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section compact-section">
+          <div class="section-title">
+            <h2>标签</h2>
+          </div>
+          <div class="category-list" id="categoryList"></div>
+        </section>
       </section>
 
-      <section class="section">
-        <div class="section-title">
-          <h2>标签</h2>
+      <section class="sidebar-group note-group">
+        <div class="sidebar-group-title">
+          <h2>便签记录</h2>
         </div>
-        <div class="category-list" id="categoryList"></div>
+        <button class="note-entry-card uncomfortable-entry" id="openUncomfortableBtn" type="button">
+          <span class="note-entry-main">让我不舒服的小事</span>
+          <span class="note-entry-meta"><span id="uncomfortableCount">0</span> 条已保存</span>
+        </button>
+        <button class="note-entry-card quick-entry" id="openQuickThingBtn" type="button">
+          <span class="note-entry-main">一下想到要干的事情</span>
+          <span class="note-entry-meta"><span id="quickThingCount">0</span> 条已保存</span>
+        </button>
       </section>
     </aside>
 
@@ -197,28 +225,245 @@
           </div>
         </section>
 
-        <section class="section note-section" id="uncomfortableSection">
-          <div class="section-title">
-            <h2>让我不舒服的小事</h2>
-          </div>
-          <button class="note-entry-card uncomfortable-entry" id="openUncomfortableBtn" type="button">
-            <span class="note-entry-main">进入记录</span>
-            <span class="note-entry-meta"><span id="uncomfortableCount">0</span> 条已保存</span>
-          </button>
-        </section>
-
-        <section class="section note-section" id="quickThingsSection">
-          <div class="section-title">
-            <h2>一下想到要干的事情</h2>
-          </div>
-          <button class="note-entry-card quick-entry" id="openQuickThingBtn" type="button">
-            <span class="note-entry-main">进入记录</span>
-            <span class="note-entry-meta"><span id="quickThingCount">0</span> 条已保存</span>
-          </button>
+      </div>
         </section>
       </div>
     </section>
+
+    <section class="module-view plan-view" id="planModule">
+      <div class="plan-page">
+        <section class="plan-panel reading-panel">
+          <header class="plan-panel-head">
+            <div>
+              <h1>阅读计划</h1>
+              <p>创建书籍入口，点进书籍后记录书评和评分</p>
+            </div>
+          </header>
+          <div class="module-create">
+            <h3 class="subsection-title">新建阅读计划</h3>
+            <form class="form" id="readingPlanForm">
+              <label>
+                书名
+                <input id="readingBookTitle" required maxlength="80" placeholder="输入书名">
+              </label>
+              <div class="form-row">
+                <label>
+                  开始时间
+                  <input type="date" id="readingStart" required>
+                </label>
+                <label>
+                  截至时间
+                  <input type="date" id="readingEnd" required>
+                </label>
+              </div>
+              <label>
+                书籍封面
+                <input type="file" id="readingCover" accept="image/*">
+              </label>
+              <button class="primary" type="submit">创建阅读计划</button>
+            </form>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">阅读计划区域</h3>
+            <div class="book-grid" id="readingPlanList"></div>
+          </div>
+        </section>
+
+        <section class="plan-panel exercise-panel">
+          <header class="plan-panel-head">
+            <div>
+              <h1>运动计划</h1>
+              <p>记录运动分类和运动时间</p>
+            </div>
+          </header>
+          <div class="module-create">
+            <h3 class="subsection-title">新建运动记录</h3>
+            <form class="form" id="exercisePlanForm">
+              <label>
+                运动分类
+                <select id="exerciseCategory">
+                  <option value="有氧">有氧</option>
+                  <option value="爬坡">爬坡</option>
+                  <option value="跑步">跑步</option>
+                  <option value="臀腿">臀腿</option>
+                  <option value="肩背">肩背</option>
+                  <option value="核心">核心</option>
+                  <option value="拉伸">拉伸</option>
+                </select>
+              </label>
+              <div class="form-row">
+                <label>
+                  运动时间
+                  <input type="datetime-local" id="exerciseTime" required>
+                </label>
+                <label>
+                  时长
+                  <input type="number" id="exerciseDuration" min="1" step="1" required placeholder="分钟">
+                </label>
+              </div>
+              <button class="primary" type="submit">保存运动记录</button>
+            </form>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">运动记录</h3>
+            <div class="items" id="exercisePlanList"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="module-view travel-view" id="travelModule">
+      <div class="travel-page">
+        <section class="travel-panel travel-editor">
+          <header class="plan-panel-head">
+            <div>
+              <h1>旅行</h1>
+              <p>新建旅行，添加城市、景点、交通方式和时间</p>
+            </div>
+          </header>
+          <div class="module-create">
+            <h3 class="subsection-title">新建旅行</h3>
+            <form class="form" id="travelTripForm">
+              <label>
+                旅行名称
+                <input id="travelTripName" required maxlength="80" placeholder="例如：日本关西七日">
+              </label>
+              <button class="primary" type="submit">创建旅行</button>
+            </form>
+          </div>
+          <div class="module-create">
+            <h3 class="subsection-title">添加行程点</h3>
+            <form class="form" id="travelStopForm">
+              <label>
+                所属旅行
+                <select id="travelTripSelect" required></select>
+              </label>
+              <div class="form-row">
+                <label>
+                  城市
+                  <input id="travelCity" list="travelCityOptions" required maxlength="60" placeholder="例如：巴黎">
+                </label>
+                <label>
+                  景点
+                  <input id="travelAttraction" required maxlength="90" placeholder="例如：卢浮宫">
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  交通方式
+                  <select id="travelTransport">
+                    <option value="飞机">飞机</option>
+                    <option value="火车">火车</option>
+                    <option value="地铁">地铁</option>
+                    <option value="公交">公交</option>
+                    <option value="自驾">自驾</option>
+                    <option value="步行">步行</option>
+                    <option value="轮船">轮船</option>
+                  </select>
+                </label>
+                <label>
+                  时间
+                  <input type="datetime-local" id="travelTime" required>
+                </label>
+              </div>
+              <button class="primary" type="submit">保存行程点</button>
+            </form>
+            <datalist id="travelCityOptions"></datalist>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">旅行列表</h3>
+            <div class="items" id="travelTripList"></div>
+          </div>
+        </section>
+
+        <section class="travel-panel travel-map-panel">
+          <header class="travel-map-head">
+            <div>
+              <h1>世界地图</h1>
+              <p id="travelMapSummary">0 个标记</p>
+            </div>
+            <div class="map-controls">
+              <button class="icon-btn" id="travelZoomOut" type="button" title="缩小">−</button>
+              <button class="icon-btn" id="travelZoomIn" type="button" title="放大">＋</button>
+              <button id="travelZoomReset" type="button" title="重置地图">重置</button>
+            </div>
+          </header>
+          <div class="world-map-shell" id="worldMapShell">
+            <svg class="world-map" id="worldMap" viewBox="0 0 1000 520" role="img" aria-label="世界地图">
+              <g id="worldMapViewport">
+                <rect class="map-water" width="1000" height="520"></rect>
+                <path class="map-land" d="M118 132 L184 96 L272 110 L330 156 L306 226 L230 244 L172 216 L104 196 Z"></path>
+                <path class="map-land" d="M270 250 L326 278 L360 344 L340 438 L290 486 L250 410 L232 324 Z"></path>
+                <path class="map-land" d="M474 104 L588 82 L724 120 L852 154 L906 226 L820 244 L724 218 L646 252 L548 226 L454 188 Z"></path>
+                <path class="map-land" d="M520 246 L610 232 L668 286 L646 374 L594 432 L536 384 L500 314 Z"></path>
+                <path class="map-land" d="M756 300 L848 286 L920 340 L888 414 L786 408 L736 354 Z"></path>
+                <path class="map-land" d="M420 374 L462 360 L492 390 L472 424 L428 418 Z"></path>
+                <path class="map-land" d="M278 84 L344 66 L380 94 L330 118 Z"></path>
+                <path class="map-land" d="M444 72 L510 58 L582 70 L560 96 L474 98 Z"></path>
+                <g class="map-grid">
+                  <path d="M0 130 H1000 M0 260 H1000 M0 390 H1000"></path>
+                  <path d="M250 0 V520 M500 0 V520 M750 0 V520"></path>
+                </g>
+                <g id="travelMarkers"></g>
+              </g>
+            </svg>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="module-view placeholder-view" id="diaryModule">
+      <div class="placeholder-panel">
+        <h1>日记</h1>
+        <p>暂无内容</p>
+      </div>
+    </section>
   </main>
+
+  <div class="note-modal" id="readingReviewModal" aria-hidden="true">
+    <div class="note-modal-panel reading-review-panel" role="dialog" aria-modal="true" aria-labelledby="readingReviewTitle">
+      <header class="note-modal-head">
+        <div>
+          <h2 id="readingReviewTitle">阅读计划</h2>
+          <p id="readingReviewMeta"></p>
+        </div>
+        <button class="mini-btn" id="closeReadingReviewBtn" title="关闭" type="button">×</button>
+      </header>
+      <div class="note-modal-body reading-review-body">
+        <div class="reading-review-summary">
+          <img id="readingReviewCover" alt="">
+          <div>
+            <strong id="readingReviewBook"></strong>
+            <span id="readingReviewDays"></span>
+          </div>
+        </div>
+        <div class="module-create">
+          <h3 class="subsection-title">写书评</h3>
+          <form class="form" id="readingReviewForm">
+            <label>
+              评分
+              <select id="readingRating" required>
+                <option value="5">5 分</option>
+                <option value="4">4 分</option>
+                <option value="3">3 分</option>
+                <option value="2">2 分</option>
+                <option value="1">1 分</option>
+              </select>
+            </label>
+            <label>
+              书评
+              <textarea id="readingReviewText" required maxlength="800" placeholder="写下这本书给你的感受、收获或问题"></textarea>
+            </label>
+            <button class="primary" type="submit">保存书评</button>
+          </form>
+        </div>
+        <div class="module-list">
+          <h3 class="subsection-title">书评记录</h3>
+          <div class="items" id="readingReviewList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="note-modal" id="uncomfortableModal" aria-hidden="true">
     <div class="note-modal-panel" role="dialog" aria-modal="true" aria-labelledby="uncomfortableModalTitle">

@@ -12,6 +12,9 @@ import { initDailyTodo, renderDailyTodos, todosForDate } from "./todolist/dailyT
 import { activePlans, initLongPlan, renderLongPlans } from "./todolist/longPlan.js";
 import { initUncomfortableNotes, renderUncomfortableNotes } from "./notes/uncomfortableNotes.js";
 import { initQuickThings, renderQuickThings } from "./notes/quickThings.js";
+import { initReadingPlan, renderReadingPlans } from "./plan/readingPlan.js";
+import { initExercisePlan, renderExercisePlans } from "./plan/exercisePlan.js";
+import { initTravelPlanner, renderTravelPlanner } from "./travel/travelPlanner.js";
 
 const now = new Date();
 const ctx = {
@@ -34,6 +37,10 @@ function init() {
   ctx.els.eventDate.value = ctx.selectedDate;
   ctx.els.bulkMoveDate.value = ctx.selectedDate;
   ctx.els.planDue.value = ctx.selectedDate;
+  ctx.els.readingStart.value = ctx.selectedDate;
+  ctx.els.readingEnd.value = ctx.selectedDate;
+  ctx.els.exerciseTime.value = toDateTimeInputValue(new Date());
+  ctx.els.travelTime.value = toDateTimeInputValue(new Date());
 
   bindGlobalShortcuts();
   initCalendar(ctx);
@@ -41,12 +48,17 @@ function init() {
   initLongPlan(ctx);
   initUncomfortableNotes(ctx);
   initQuickThings(ctx);
+  initReadingPlan(ctx);
+  initExercisePlan(ctx);
+  initTravelPlanner(ctx);
   registerServiceWorker();
   render();
 }
 
 function getElements() {
   return {
+    navTabs: Array.from(document.querySelectorAll(".nav-tab")),
+    moduleViews: Array.from(document.querySelectorAll(".module-view")),
     todayText: document.getElementById("todayText"),
     statEvents: document.getElementById("statEvents"),
     statTodos: document.getElementById("statTodos"),
@@ -63,8 +75,6 @@ function getElements() {
     quickEventBtn: document.getElementById("quickEventBtn"),
     quickTodoBtn: document.getElementById("quickTodoBtn"),
     quickPlanBtn: document.getElementById("quickPlanBtn"),
-    quickUncomfortableBtn: document.getElementById("quickUncomfortableBtn"),
-    quickThingBtn: document.getElementById("quickThingBtn"),
     openUncomfortableBtn: document.getElementById("openUncomfortableBtn"),
     openQuickThingBtn: document.getElementById("openQuickThingBtn"),
     closeUncomfortableBtn: document.getElementById("closeUncomfortableBtn"),
@@ -100,29 +110,67 @@ function getElements() {
     quickThingForm: document.getElementById("quickThingForm"),
     quickThingText: document.getElementById("quickThingText"),
     quickThingList: document.getElementById("quickThingList"),
+    readingPlanForm: document.getElementById("readingPlanForm"),
+    readingBookTitle: document.getElementById("readingBookTitle"),
+    readingStart: document.getElementById("readingStart"),
+    readingEnd: document.getElementById("readingEnd"),
+    readingCover: document.getElementById("readingCover"),
+    readingPlanList: document.getElementById("readingPlanList"),
+    readingReviewModal: document.getElementById("readingReviewModal"),
+    closeReadingReviewBtn: document.getElementById("closeReadingReviewBtn"),
+    readingReviewTitle: document.getElementById("readingReviewTitle"),
+    readingReviewMeta: document.getElementById("readingReviewMeta"),
+    readingReviewCover: document.getElementById("readingReviewCover"),
+    readingReviewBook: document.getElementById("readingReviewBook"),
+    readingReviewDays: document.getElementById("readingReviewDays"),
+    readingReviewForm: document.getElementById("readingReviewForm"),
+    readingRating: document.getElementById("readingRating"),
+    readingReviewText: document.getElementById("readingReviewText"),
+    readingReviewList: document.getElementById("readingReviewList"),
+    exercisePlanForm: document.getElementById("exercisePlanForm"),
+    exerciseCategory: document.getElementById("exerciseCategory"),
+    exerciseTime: document.getElementById("exerciseTime"),
+    exerciseDuration: document.getElementById("exerciseDuration"),
+    exercisePlanList: document.getElementById("exercisePlanList"),
+    travelTripForm: document.getElementById("travelTripForm"),
+    travelTripName: document.getElementById("travelTripName"),
+    travelStopForm: document.getElementById("travelStopForm"),
+    travelTripSelect: document.getElementById("travelTripSelect"),
+    travelCity: document.getElementById("travelCity"),
+    travelAttraction: document.getElementById("travelAttraction"),
+    travelTransport: document.getElementById("travelTransport"),
+    travelTime: document.getElementById("travelTime"),
+    travelCityOptions: document.getElementById("travelCityOptions"),
+    travelTripList: document.getElementById("travelTripList"),
+    travelMapSummary: document.getElementById("travelMapSummary"),
+    travelZoomOut: document.getElementById("travelZoomOut"),
+    travelZoomIn: document.getElementById("travelZoomIn"),
+    travelZoomReset: document.getElementById("travelZoomReset"),
+    worldMapShell: document.getElementById("worldMapShell"),
+    worldMapViewport: document.getElementById("worldMapViewport"),
+    travelMarkers: document.getElementById("travelMarkers"),
     toast: document.getElementById("toast")
   };
 }
 
 function bindGlobalShortcuts() {
+  ctx.els.navTabs.forEach((tab) => {
+    tab.addEventListener("click", () => switchModule(tab.dataset.view));
+  });
+
   ctx.els.quickEventBtn.addEventListener("click", () => {
+    switchModule("calendarModule");
     focusSection("eventSection", ctx.els.eventTitle);
   });
 
   ctx.els.quickTodoBtn.addEventListener("click", () => {
+    switchModule("calendarModule");
     focusSection("dailyTodoSection", ctx.els.todoText);
   });
 
   ctx.els.quickPlanBtn.addEventListener("click", () => {
+    switchModule("calendarModule");
     focusSection("longPlanSection", ctx.els.planTitle);
-  });
-
-  ctx.els.quickUncomfortableBtn.addEventListener("click", () => {
-    openNoteModal(ctx.els.uncomfortableModal, ctx.els.uncomfortableText);
-  });
-
-  ctx.els.quickThingBtn.addEventListener("click", () => {
-    openNoteModal(ctx.els.quickThingModal, ctx.els.quickThingText);
   });
 
   ctx.els.openUncomfortableBtn.addEventListener("click", () => {
@@ -146,6 +194,19 @@ function bindGlobalShortcuts() {
     if (event.key !== "Escape") return;
     closeNoteModal(ctx.els.uncomfortableModal);
     closeNoteModal(ctx.els.quickThingModal);
+    ctx.els.closeReadingReviewBtn.click();
+  });
+}
+
+function switchModule(viewId) {
+  ctx.els.navTabs.forEach((tab) => {
+    const active = tab.dataset.view === viewId;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+
+  ctx.els.moduleViews.forEach((view) => {
+    view.classList.toggle("is-active", view.id === viewId);
   });
 }
 
@@ -171,6 +232,9 @@ function renderDetails() {
   renderLongPlans(ctx);
   renderUncomfortableNotes(ctx);
   renderQuickThings(ctx);
+  renderReadingPlans(ctx);
+  renderExercisePlans(ctx);
+  renderTravelPlanner(ctx);
 }
 
 function renderSidebar() {
@@ -220,6 +284,11 @@ function closeNoteModal(modal) {
   if (!document.querySelector(".note-modal.is-open")) {
     document.body.classList.remove("modal-open");
   }
+}
+
+function toDateTimeInputValue(date) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
 }
 
 function registerServiceWorker() {

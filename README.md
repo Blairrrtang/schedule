@@ -20,6 +20,11 @@
 ├─ notes/
 │  ├─ uncomfortableNotes.js
 │  └─ quickThings.js
+├─ plan/
+│  ├─ readingPlan.js
+│  └─ exercisePlan.js
+├─ travel/
+│  └─ travelPlanner.js
 └─ icons/
    └─ icon.svg
 ```
