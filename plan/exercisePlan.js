@@ -6,8 +6,9 @@ export function initExercisePlan(ctx) {
 
 export function renderExercisePlans(ctx) {
   const records = [...ctx.state.exercisePlans].sort((a, b) => b.exercisedAt.localeCompare(a.exercisedAt));
+  const groups = groupRecordsByDate(records);
   ctx.els.exercisePlanList.innerHTML = records.length
-    ? records.map(renderExerciseItem).join("")
+    ? groups.map(renderExerciseDayGroup).join("")
     : `<div class="empty">还没有运动记录</div>`;
 
   ctx.els.exercisePlanList.querySelectorAll("[data-delete-exercise]").forEach((button) => {
@@ -37,6 +38,23 @@ function addExercisePlan(event, ctx) {
   ctx.render();
 }
 
+function renderExerciseDayGroup(group) {
+  const totalDuration = group.records.reduce((sum, record) => sum + Number(record.duration || 0), 0);
+  return `
+    <article class="exercise-day-group">
+      <header class="exercise-day-head">
+        <div>
+          <strong>${formatExerciseDate(group.date)}</strong>
+          <span>${group.records.length} 条记录 · 共 ${totalDuration} 分钟</span>
+        </div>
+      </header>
+      <div class="exercise-day-list">
+        ${group.records.map(renderExerciseItem).join("")}
+      </div>
+    </article>
+  `;
+}
+
 function renderExerciseItem(record) {
   return `
     <article class="exercise-item">
@@ -51,11 +69,31 @@ function renderExerciseItem(record) {
   `;
 }
 
+function groupRecordsByDate(records) {
+  const map = new Map();
+  records.forEach((record) => {
+    const date = record.exercisedAt.slice(0, 10);
+    if (!map.has(date)) map.set(date, []);
+    map.get(date).push(record);
+  });
+
+  return Array.from(map.entries()).map(([date, dayRecords]) => ({
+    date,
+    records: dayRecords.sort((a, b) => b.exercisedAt.localeCompare(a.exercisedAt))
+  }));
+}
+
+function formatExerciseDate(value) {
+  return new Date(`${value}T00:00`).toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "long"
+  });
+}
+
 function formatExerciseTime(value) {
   return new Date(value).toLocaleString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
     hour: "2-digit",
     minute: "2-digit"
   });

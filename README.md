@@ -25,8 +25,13 @@
 │  └─ exercisePlan.js
 ├─ travel/
 │  └─ travelPlanner.js
+├─ diary/
+│  └─ diary.js
 └─ icons/
-   └─ icon.svg
+   ├─ icon.svg
+   ├─ icon-192.png
+   ├─ icon-512.png
+   └─ apple-touch-icon.png
 ```
 
 ## 数据保存方式
@@ -39,6 +44,8 @@
 - 如果以后需要多设备同步同一份数据，需要再接入账号和云数据库。
 
 旅行页面使用 Leaflet + OpenStreetMap 显示真实世界地图。应用本身仍然是静态网页，但地图底图需要联网加载。
+
+旅行城市坐标使用 OpenStreetMap Nominatim 搜索。常用城市会优先使用内置坐标，其他城市会联网查询并缓存结果，以减少重复请求。
 
 阅读计划会根据书名通过 Open Library 搜索封面。没找到封面或离线时，会自动生成本地文字封面。
 
@@ -87,3 +94,23 @@ https://你的用户名.github.io/schedule-app/
 3. 以后可以像普通软件一样从桌面或开始菜单打开。
 
 首次打开并加载完成后，应用的静态文件会被缓存。没有网络时，浏览器通常也能打开已缓存的页面。
+
+## 安装到手机
+
+先把项目部署到 GitHub Pages、Netlify、Vercel 或 Cloudflare Pages，得到一个 `https://` 开头的网址。
+
+Android：
+
+1. 用 Chrome 打开部署后的网站。
+2. 点击浏览器菜单。
+3. 选择 `添加到主屏幕` 或 `安装应用`。
+4. 安装后会出现在手机桌面，像普通 App 一样打开。
+
+iPhone：
+
+1. 用 Safari 打开部署后的网站。
+2. 点击底部分享按钮。
+3. 选择 `添加到主屏幕`。
+4. 确认名称后添加。
+
+说明：这是 PWA 应用，不需要上架应用商店。它可以安装到手机桌面，但数据仍然保存在当前手机浏览器本地。

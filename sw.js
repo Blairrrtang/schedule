@@ -1,4 +1,4 @@
-const CACHE_NAME = "schedule-app-v11";
+const CACHE_NAME = "schedule-app-v16";
 const ASSETS = [
   "./",
   "./index.html",
@@ -13,8 +13,12 @@ const ASSETS = [
   "./plan/readingPlan.js",
   "./plan/exercisePlan.js",
   "./travel/travelPlanner.js",
+  "./diary/diary.js",
   "./manifest.webmanifest",
-  "./icons/icon.svg"
+  "./icons/icon.svg",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", (event) => {

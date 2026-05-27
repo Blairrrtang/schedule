@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>日程</title>
   <meta name="theme-color" content="#111827">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="日程">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -233,7 +238,11 @@
 
     <section class="module-view plan-view" id="planModule">
       <div class="plan-page">
-        <section class="plan-panel reading-panel">
+        <div class="sub-nav" role="tablist" aria-label="计划分类">
+          <button class="sub-nav-btn is-active" type="button" data-subnav-target="planReadingView">阅读</button>
+          <button class="sub-nav-btn" type="button" data-subnav-target="planExerciseView">运动</button>
+        </div>
+        <section class="plan-panel reading-panel sub-view is-active" id="planReadingView">
           <header class="plan-panel-head">
             <div>
               <h1>阅读计划</h1>
@@ -267,7 +276,7 @@
           </div>
         </section>
 
-        <section class="plan-panel exercise-panel">
+        <section class="plan-panel exercise-panel sub-view" id="planExerciseView">
           <header class="plan-panel-head">
             <div>
               <h1>运动计划</h1>
@@ -312,10 +321,63 @@
 
     <section class="module-view travel-view" id="travelModule">
       <div class="travel-page">
-        <section class="travel-panel travel-editor">
+        <div class="sub-nav" role="tablist" aria-label="旅行分类">
+          <button class="sub-nav-btn is-active" type="button" data-subnav-target="travelGuideView">攻略</button>
+          <button class="sub-nav-btn" type="button" data-subnav-target="travelItineraryView">行程</button>
+          <button class="sub-nav-btn" type="button" data-subnav-target="travelMapView">地图</button>
+        </div>
+        <section class="travel-panel travel-editor sub-view is-active" id="travelGuideView">
           <header class="plan-panel-head">
             <div>
-              <h1>旅行</h1>
+              <h1>旅行攻略</h1>
+              <p>根据起点、目的地、天数和偏好生成参考攻略</p>
+            </div>
+          </header>
+          <div class="module-create">
+            <h3 class="subsection-title">旅行攻略生成器</h3>
+            <form class="form" id="travelGuideForm">
+              <div class="form-row">
+                <label>
+                  起始地
+                  <input id="travelGuideOrigin" required maxlength="60" placeholder="例如：上海">
+                </label>
+                <label>
+                  目的地
+                  <input id="travelGuideDestination" required maxlength="60" placeholder="例如：东京">
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  旅行时间
+                  <input type="number" id="travelGuideDays" min="1" max="30" required placeholder="天数">
+                </label>
+                <label>
+                  偏好
+                  <select id="travelGuidePreference">
+                    <option value="经典景点">经典景点</option>
+                    <option value="美食">美食</option>
+                    <option value="博物馆">博物馆</option>
+                    <option value="自然风景">自然风景</option>
+                    <option value="亲子轻松">亲子轻松</option>
+                    <option value="省钱">省钱</option>
+                    <option value="购物">购物</option>
+                    <option value="深度慢游">深度慢游</option>
+                  </select>
+                </label>
+              </div>
+              <button class="primary" type="submit">生成攻略</button>
+            </form>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">攻略参考</h3>
+            <div class="items" id="travelGuideList"></div>
+          </div>
+        </section>
+
+        <section class="travel-panel travel-editor sub-view" id="travelItineraryView">
+          <header class="plan-panel-head">
+            <div>
+              <h1>旅行行程</h1>
               <p>新建旅行，添加城市、景点、交通方式和时间</p>
             </div>
           </header>
@@ -374,7 +436,7 @@
           </div>
         </section>
 
-        <section class="travel-panel travel-map-panel">
+        <section class="travel-panel travel-map-panel sub-view" id="travelMapView">
           <header class="travel-map-head">
             <div>
               <h1>世界地图</h1>
@@ -393,13 +455,58 @@
       </div>
     </section>
 
-    <section class="module-view placeholder-view" id="diaryModule">
-      <div class="placeholder-panel">
-        <h1>日记</h1>
-        <p>暂无内容</p>
+    <section class="module-view diary-view" id="diaryModule">
+      <div class="diary-page">
+        <section class="diary-panel">
+          <header class="plan-panel-head">
+            <div>
+              <h1>日记</h1>
+              <p>写下今天的想法，历史日记会保存下来</p>
+            </div>
+          </header>
+          <div class="module-create">
+            <h3 class="subsection-title">新建日记</h3>
+            <form class="form" id="diaryForm">
+              <label>
+                标题
+                <input id="diaryTitle" required maxlength="80" placeholder="今天的标题">
+              </label>
+              <label>
+                内容
+                <textarea id="diaryContent" required maxlength="2000" placeholder="写下今天发生了什么、想到了什么"></textarea>
+              </label>
+              <button class="primary" type="submit">保存日记</button>
+            </form>
+          </div>
+          <div class="module-list">
+            <h3 class="subsection-title">历史日记</h3>
+            <div class="items" id="diaryList"></div>
+          </div>
+        </section>
       </div>
     </section>
   </main>
+
+  <div class="note-modal" id="diaryLockModal" aria-hidden="true">
+    <div class="note-modal-panel diary-lock-panel" role="dialog" aria-modal="true" aria-labelledby="diaryLockTitle">
+      <header class="note-modal-head">
+        <div>
+          <h2 id="diaryLockTitle">进入日记</h2>
+          <p id="diaryLockHint">请输入 6 位数字密码</p>
+        </div>
+        <button class="mini-btn" id="closeDiaryLockBtn" title="关闭" type="button">×</button>
+      </header>
+      <div class="note-modal-body">
+        <form class="form" id="diaryPasswordForm">
+          <label>
+            密码
+            <input id="diaryPasswordInput" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="6 位数字">
+          </label>
+          <button class="primary" type="submit" id="diaryPasswordSubmit">确认</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <div class="note-modal" id="readingReviewModal" aria-hidden="true">
     <div class="note-modal-panel reading-review-panel" role="dialog" aria-modal="true" aria-labelledby="readingReviewTitle">

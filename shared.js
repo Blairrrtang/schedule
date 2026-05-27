@@ -51,7 +51,11 @@ export function createDefaultState(today = new Date()) {
     quickThings: [],
     readingPlans: [],
     exercisePlans: [],
-    travelTrips: []
+    travelTrips: [],
+    travelGuides: [],
+    travelCityCache: {},
+    diaryPasswordHash: "",
+    diaries: []
   };
 }
 
@@ -67,7 +71,11 @@ export function loadState() {
       quickThings: Array.isArray(saved.quickThings) ? saved.quickThings : [],
       readingPlans: Array.isArray(saved.readingPlans) ? saved.readingPlans : [],
       exercisePlans: Array.isArray(saved.exercisePlans) ? saved.exercisePlans : [],
-      travelTrips: Array.isArray(saved.travelTrips) ? saved.travelTrips : []
+      travelTrips: Array.isArray(saved.travelTrips) ? saved.travelTrips : [],
+      travelGuides: Array.isArray(saved.travelGuides) ? saved.travelGuides : [],
+      travelCityCache: saved.travelCityCache && typeof saved.travelCityCache === "object" ? saved.travelCityCache : {},
+      diaryPasswordHash: typeof saved.diaryPasswordHash === "string" ? saved.diaryPasswordHash : "",
+      diaries: Array.isArray(saved.diaries) ? saved.diaries : []
     };
   } catch {
     return createDefaultState();

@@ -15,6 +15,7 @@ import { initQuickThings, renderQuickThings } from "./notes/quickThings.js";
 import { initReadingPlan, renderReadingPlans } from "./plan/readingPlan.js";
 import { initExercisePlan, renderExercisePlans } from "./plan/exercisePlan.js";
 import { initTravelPlanner, renderTravelPlanner } from "./travel/travelPlanner.js";
+import { closeDiaryIfNeeded, initDiary, renderDiaries, requestDiaryAccess } from "./diary/diary.js";
 
 const now = new Date();
 const ctx = {
@@ -25,6 +26,7 @@ const ctx = {
   els: getElements(),
   render,
   showToast,
+  switchModule,
   todosForDate: (date) => todosForDate(ctx.state, date),
   formatLongDate
 };
@@ -43,6 +45,7 @@ function init() {
   ctx.els.travelTime.value = toDateTimeInputValue(new Date());
 
   bindGlobalShortcuts();
+  bindSubNavigation();
   initCalendar(ctx);
   initDailyTodo(ctx);
   initLongPlan(ctx);
@@ -51,6 +54,7 @@ function init() {
   initReadingPlan(ctx);
   initExercisePlan(ctx);
   initTravelPlanner(ctx);
+  initDiary(ctx);
   registerServiceWorker();
   render();
 }
@@ -59,6 +63,7 @@ function getElements() {
   return {
     navTabs: Array.from(document.querySelectorAll(".nav-tab")),
     moduleViews: Array.from(document.querySelectorAll(".module-view")),
+    subNavButtons: Array.from(document.querySelectorAll(".sub-nav-btn")),
     todayText: document.getElementById("todayText"),
     statEvents: document.getElementById("statEvents"),
     statTodos: document.getElementById("statTodos"),
@@ -131,6 +136,12 @@ function getElements() {
     exerciseTime: document.getElementById("exerciseTime"),
     exerciseDuration: document.getElementById("exerciseDuration"),
     exercisePlanList: document.getElementById("exercisePlanList"),
+    travelGuideForm: document.getElementById("travelGuideForm"),
+    travelGuideOrigin: document.getElementById("travelGuideOrigin"),
+    travelGuideDestination: document.getElementById("travelGuideDestination"),
+    travelGuideDays: document.getElementById("travelGuideDays"),
+    travelGuidePreference: document.getElementById("travelGuidePreference"),
+    travelGuideList: document.getElementById("travelGuideList"),
     travelTripForm: document.getElementById("travelTripForm"),
     travelTripName: document.getElementById("travelTripName"),
     travelStopForm: document.getElementById("travelStopForm"),
@@ -147,6 +158,17 @@ function getElements() {
     travelZoomReset: document.getElementById("travelZoomReset"),
     worldMapShell: document.getElementById("worldMapShell"),
     travelLeafletMap: document.getElementById("travelLeafletMap"),
+    diaryForm: document.getElementById("diaryForm"),
+    diaryTitle: document.getElementById("diaryTitle"),
+    diaryContent: document.getElementById("diaryContent"),
+    diaryList: document.getElementById("diaryList"),
+    diaryLockModal: document.getElementById("diaryLockModal"),
+    diaryLockTitle: document.getElementById("diaryLockTitle"),
+    diaryLockHint: document.getElementById("diaryLockHint"),
+    diaryPasswordForm: document.getElementById("diaryPasswordForm"),
+    diaryPasswordInput: document.getElementById("diaryPasswordInput"),
+    diaryPasswordSubmit: document.getElementById("diaryPasswordSubmit"),
+    closeDiaryLockBtn: document.getElementById("closeDiaryLockBtn"),
     toast: document.getElementById("toast")
   };
 }
@@ -193,10 +215,30 @@ function bindGlobalShortcuts() {
     closeNoteModal(ctx.els.uncomfortableModal);
     closeNoteModal(ctx.els.quickThingModal);
     ctx.els.closeReadingReviewBtn.click();
+    ctx.els.closeDiaryLockBtn.click();
   });
 }
 
-function switchModule(viewId) {
+function bindSubNavigation() {
+  ctx.els.subNavButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = document.getElementById(button.dataset.subnavTarget);
+      const scope = button.closest(".module-view");
+      if (!target || !scope) return;
+      scope.querySelectorAll(".sub-nav-btn").forEach((item) => item.classList.toggle("is-active", item === button));
+      scope.querySelectorAll(".sub-view").forEach((view) => view.classList.toggle("is-active", view === target));
+      if (target.id === "travelMapView") setTimeout(() => window.dispatchEvent(new Event("resize")), 80);
+    });
+  });
+}
+
+function switchModule(viewId, options = {}) {
+  if (viewId === "diaryModule" && !options.skipDiaryGuard && !requestDiaryAccess(ctx, viewId)) {
+    return;
+  }
+
+  closeDiaryIfNeeded(viewId);
+
   ctx.els.navTabs.forEach((tab) => {
     const active = tab.dataset.view === viewId;
     tab.classList.toggle("is-active", active);
@@ -237,6 +279,7 @@ function renderDetails() {
   renderReadingPlans(ctx);
   renderExercisePlans(ctx);
   renderTravelPlanner(ctx);
+  renderDiaries(ctx);
 }
 
 function renderSidebar() {

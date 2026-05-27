@@ -48,10 +48,12 @@ const cityCoordinates = {
 let mapZoom = 1;
 let leafletMap = null;
 let markerLayer = null;
+let lastGeocodeAt = 0;
 
 export function initTravelPlanner(ctx) {
   fillCityOptions(ctx);
   initLeafletMap(ctx);
+  ctx.els.travelGuideForm.addEventListener("submit", (event) => generateGuide(event, ctx));
   ctx.els.travelTripForm.addEventListener("submit", (event) => addTrip(event, ctx));
   ctx.els.travelStopForm.addEventListener("submit", (event) => addStop(event, ctx));
   ctx.els.travelZoomIn.addEventListener("click", () => setMapZoom(ctx, mapZoom + 0.25));
@@ -60,9 +62,33 @@ export function initTravelPlanner(ctx) {
 }
 
 export function renderTravelPlanner(ctx) {
+  renderGuideList(ctx);
   renderTripSelect(ctx);
   renderTripList(ctx);
   renderMarkers(ctx);
+}
+
+function generateGuide(event, ctx) {
+  event.preventDefault();
+  const origin = ctx.els.travelGuideOrigin.value.trim();
+  const destination = ctx.els.travelGuideDestination.value.trim();
+  const days = Number(ctx.els.travelGuideDays.value);
+  const preference = ctx.els.travelGuidePreference.value;
+  if (!origin || !destination || !days) return;
+
+  ctx.state.travelGuides.unshift({
+    id: uid(),
+    origin,
+    destination,
+    days,
+    preference,
+    content: buildGuide(origin, destination, days, preference),
+    createdAt: new Date().toISOString()
+  });
+
+  ctx.els.travelGuideForm.reset();
+  ctx.showToast("旅行攻略已生成");
+  ctx.render();
 }
 
 function addTrip(event, ctx) {
@@ -82,14 +108,14 @@ function addTrip(event, ctx) {
   ctx.render();
 }
 
-function addStop(event, ctx) {
+async function addStop(event, ctx) {
   event.preventDefault();
   const trip = ctx.state.travelTrips.find((item) => item.id === ctx.els.travelTripSelect.value);
   const city = ctx.els.travelCity.value.trim();
-  const coords = cityCoordinates[city];
+  const coords = await resolveCityCoordinates(ctx, city);
 
   if (!trip || !city || !coords) {
-    ctx.showToast("请使用城市列表中的城市");
+    ctx.showToast("没有找到这个城市的坐标");
     return;
   }
 
@@ -111,6 +137,35 @@ function addStop(event, ctx) {
   ctx.render();
 }
 
+function renderGuideList(ctx) {
+  ctx.els.travelGuideList.innerHTML = ctx.state.travelGuides.length
+    ? ctx.state.travelGuides.map(renderGuideItem).join("")
+    : `<div class="empty">还没有生成攻略</div>`;
+
+  ctx.els.travelGuideList.querySelectorAll("[data-delete-guide]").forEach((button) => {
+    button.addEventListener("click", () => {
+      ctx.state.travelGuides = ctx.state.travelGuides.filter((guide) => guide.id !== button.dataset.deleteGuide);
+      ctx.showToast("攻略已删除");
+      ctx.render();
+    });
+  });
+}
+
+function renderGuideItem(guide) {
+  return `
+    <article class="travel-guide-item">
+      <div class="travel-trip-head">
+        <div class="item-title">
+          <strong>${escapeHTML(guide.origin)} → ${escapeHTML(guide.destination)}</strong>
+          <span>${guide.days} 天 · ${escapeHTML(guide.preference)} · ${formatTravelTime(guide.createdAt)}</span>
+        </div>
+        <button class="mini-btn danger" data-delete-guide="${guide.id}" title="删除攻略" type="button">×</button>
+      </div>
+      <div class="travel-guide-content">${guide.content.map((line) => `<p>${escapeHTML(line)}</p>`).join("")}</div>
+    </article>
+  `;
+}
+
 function renderTripSelect(ctx) {
   ctx.els.travelTripSelect.innerHTML = ctx.state.travelTrips.length
     ? ctx.state.travelTrips.map((trip) => `<option value="${trip.id}">${escapeHTML(trip.name)}</option>`).join("")
@@ -129,6 +184,45 @@ function renderTripList(ctx) {
       ctx.render();
     });
   });
+}
+
+function buildGuide(origin, destination, days, preference) {
+  const pace = days <= 2 ? "短途紧凑型" : days <= 5 ? "均衡节奏型" : "慢游深度型";
+  const themes = guideThemes(preference);
+  const lines = [
+    `路线定位：从 ${origin} 出发前往 ${destination}，建议采用${pace}安排。`,
+    `出发前：提前确认交通票、住宿位置和当地天气，把第一晚住宿放在交通方便的区域。`,
+    `交通建议：跨城市优先选择飞机或高铁；目的地市内优先使用公共交通，景点密集区域安排步行。`
+  ];
+
+  for (let day = 1; day <= days; day += 1) {
+    const theme = themes[(day - 1) % themes.length];
+    if (day === 1) {
+      lines.push(`第 ${day} 天：抵达 ${destination}，办理入住，安排 ${theme} 的轻量行程，晚上熟悉周边交通和餐饮。`);
+    } else if (day === days) {
+      lines.push(`第 ${day} 天：预留返程和购物整理时间，上午安排 ${theme}，下午提前前往机场或车站。`);
+    } else {
+      lines.push(`第 ${day} 天：以 ${theme} 为主线，上午安排核心景点，下午加入休息或咖啡时间，晚上体验当地餐饮。`);
+    }
+  }
+
+  lines.push(`偏好提示：你选择的是“${preference}”，建议每天只放 1-2 个重点，避免为了打卡牺牲体验。`);
+  lines.push("预算提醒：把门票、交通、餐饮、临时购物分开记录，留出约 15% 的机动预算。");
+  return lines;
+}
+
+function guideThemes(preference) {
+  const map = {
+    "经典景点": ["地标景点", "老城区漫步", "城市观景点", "热门街区"],
+    "美食": ["早餐店和市集", "当地特色餐厅", "甜品咖啡路线", "夜市或小酒馆"],
+    "博物馆": ["博物馆和美术馆", "历史街区", "建筑参观", "书店和文化空间"],
+    "自然风景": ["公园和湖畔", "郊外自然点", "日落观景", "轻徒步路线"],
+    "亲子轻松": ["低强度景点", "公园或水族馆", "亲子餐厅", "早回酒店休息"],
+    "省钱": ["免费景点", "公共交通路线", "当地市场", "平价餐厅"],
+    "购物": ["商圈百货", "特色小店", "伴手礼采购", "奥莱或市集"],
+    "深度慢游": ["街区散步", "本地咖啡馆", "小众展览", "生活市场"]
+  };
+  return map[preference] || map["经典景点"];
 }
 
 function renderTripItem(trip) {
@@ -187,6 +281,31 @@ function fillCityOptions(ctx) {
     .sort((a, b) => a.localeCompare(b, "zh-CN"))
     .map((city) => `<option value="${city}"></option>`)
     .join("");
+}
+
+async function resolveCityCoordinates(ctx, city) {
+  if (cityCoordinates[city]) return cityCoordinates[city];
+  if (ctx.state.travelCityCache[city]) return ctx.state.travelCityCache[city];
+
+  try {
+    const wait = Math.max(0, 1100 - (Date.now() - lastGeocodeAt));
+    if (wait) await delay(wait);
+    lastGeocodeAt = Date.now();
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}&limit=1&accept-language=zh-CN`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const results = await response.json();
+    if (!results.length) return null;
+    const coords = [Number(results[0].lat), Number(results[0].lon)];
+    ctx.state.travelCityCache[city] = coords;
+    return coords;
+  } catch {
+    return null;
+  }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function formatTravelTime(value) {
