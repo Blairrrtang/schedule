@@ -409,7 +409,7 @@ textarea:focus {
 
 .travel-guide-content {
   display: grid;
-  gap: 6px;
+  gap: 10px;
 }
 
 .travel-guide-content p {
@@ -418,6 +418,69 @@ textarea:focus {
   font-size: 13px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+.guide-block,
+.guide-day {
+  border: 1px solid #e8e8df;
+  border-radius: 6px;
+  background: #fbfcfb;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.guide-block h4,
+.guide-day h4 {
+  margin: 0;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.guide-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.guide-link-row a {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 9px;
+  color: #0f766e;
+  background: #fff;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.guide-day-list {
+  display: grid;
+  gap: 7px;
+}
+
+.guide-day-item {
+  border-left: 3px solid var(--focus);
+  background: #fff;
+  padding: 8px;
+  display: grid;
+  gap: 3px;
+}
+
+.guide-day-item strong {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.guide-day-item span,
+.guide-day-item p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .travel-trip-head {

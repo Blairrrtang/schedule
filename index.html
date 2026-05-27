@@ -365,6 +365,26 @@
                   </select>
                 </label>
               </div>
+              <div class="form-row">
+                <label>
+                  住宿最低价
+                  <input type="number" id="travelGuideBudgetMin" min="0" step="50" placeholder="每晚，如 300">
+                </label>
+                <label>
+                  住宿最高价
+                  <input type="number" id="travelGuideBudgetMax" min="0" step="50" placeholder="每晚，如 800">
+                </label>
+              </div>
+              <label>
+                住宿类型
+                <select id="travelGuideStayType">
+                  <option value="酒店或民宿">酒店或民宿</option>
+                  <option value="酒店">酒店</option>
+                  <option value="民宿">民宿</option>
+                  <option value="青旅">青旅</option>
+                  <option value="公寓式酒店">公寓式酒店</option>
+                </select>
+              </label>
               <button class="primary" type="submit">生成攻略</button>
             </form>
           </div>
